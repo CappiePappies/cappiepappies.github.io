@@ -1,11 +1,7 @@
 # cappiepappies.github.io
-An output page showcasing the outputs of the Paper titled "Mask-Based Diffusion for Music Generation From Everyday Sounds".
+An output page showcasing the inputs and outputs of the Paper titled "Mask-Based Diffusion for Music Generation From Everyday Sounds".
 
-# Noise-to-Music Conversion Results
-
-This table showcases examples of generated music from noise inputs using our model.
-
-# Noise-to-Music Examples
+## Noise-to-Music Examples
 
 <table>
   <thead>
@@ -18,27 +14,13 @@ This table showcases examples of generated music from noise inputs using our mod
     <tr>
       <td align="center">
         <audio controls>
-          <source src="inputs/train_passing.wav" type="audio/wav">
+          <source src="inputs/train_passing_input.wav" type="audio/wav">
           Your browser does not support the audio element.
         </audio>
       </td>
       <td align="center">
         <audio controls>
-          <source src="outputs/trainpassby.wav" type="audio/wav">
-          Your browser does not support the audio element.
-        </audio>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <audio controls>
-          <source src="inputs/clock_ticking.wav" type="audio/wav">
-          Your browser does not support the audio element.
-        </audio>
-      </td>
-      <td align="center">
-        <audio controls>
-          <source src="outputs/tickingoutput.wav" type="audio/wav">
+          <source src="outputs/train_passing_output.wav" type="audio/wav">
           Your browser does not support the audio element.
         </audio>
       </td>
@@ -46,13 +28,69 @@ This table showcases examples of generated music from noise inputs using our mod
     <tr>
       <td align="center">
         <audio controls>
-          <source src="inputs/cuckoo_clock.wav" type="audio/wav">
+          <source src="inputs/clock_ticking_input.wav" type="audio/wav">
           Your browser does not support the audio element.
         </audio>
       </td>
       <td align="center">
         <audio controls>
-          <source src="outputs/cuckooclockoutput.wav" type="audio/wav">
+          <source src="outputs/clock_ticking_output.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <audio controls>
+          <source src="inputs/cuckoo_clock_input.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+      <td align="center">
+        <audio controls>
+          <source src="outputs/cuckoo_clock_output.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <audio controls>
+          <source src="inputs/mario_coin_input.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+      <td align="center">
+        <audio controls>
+          <source src="outputs/mario_coin_output.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <audio controls>
+          <source src="inputs/loud_honking_input.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+      <td align="center">
+        <audio controls>
+          <source src="outputs/loud_honking_output.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <audio controls>
+          <source src="inputs/geese_honking_input.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </td>
+      <td align="center">
+        <audio controls>
+          <source src="outputs/geese_honking_output.wav" type="audio/wav">
           Your browser does not support the audio element.
         </audio>
       </td>
