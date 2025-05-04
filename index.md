@@ -6,12 +6,14 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
 <table>
   <thead>
     <tr>
+      <th align="center">📖 Noise Sample</th>
       <th align="center">🎧 Noise Input</th>
       <th align="center">🎼 Music Output</th>
     </tr>
   </thead>
   <tbody>
     <tr>
+      <td align="center">A passing train</td>
       <td align="center">
         <audio controls>
           <source src="inputs/train_passing_input.wav" type="audio/wav">
@@ -26,6 +28,7 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
       </td>
     </tr>
     <tr>
+      <td align="center">A ticking clock</td> 
       <td align="center">
         <audio controls>
           <source src="inputs/clock_ticking_input.wav" type="audio/wav">
@@ -40,6 +43,7 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
       </td>
     </tr>
     <tr>
+      <td align="center">A cuckoo clock</td>
       <td align="center">
         <audio controls>
           <source src="inputs/cuckoo_clock_input.wav" type="audio/wav">
@@ -54,6 +58,7 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
       </td>
     </tr>
     <tr>
+      <td align="center">Coin sound from Mario</td>
       <td align="center">
         <audio controls>
           <source src="inputs/mario_coin_input.wav" type="audio/wav">
@@ -68,6 +73,7 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
       </td>
     </tr>
     <tr>
+      <td align="center">A honking truck</td>
       <td align="center">
         <audio controls>
           <source src="inputs/loud_honking_input.wav" type="audio/wav">
@@ -82,6 +88,7 @@ An output page showcasing the inputs and outputs of the Paper titled "Mask-Based
       </td>
     </tr>
     <tr>
+      <td align="center">A gaggle of geese</td>
       <td align="center">
         <audio controls>
           <source src="inputs/geese_honking_input.wav" type="audio/wav">
