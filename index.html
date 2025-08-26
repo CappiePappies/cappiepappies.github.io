@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mask-Based Diffusion for Music Generation</title>
+    <style>
+        /* --- Basic Setup & Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1d;
+            --container-bg: #2c2c30;
+            --border-color: #4b4b53;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --primary-color: #9f7aea;
+            --highlight-color: #f6ad55;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* --- Main Layout & Typography --- */
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header-link {
+            display: inline-block;
+            font-family: var(--font-mono);
+            color: var(--border-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: color 0.2s ease;
+        }
+        .header-link:hover {
+            color: var(--text-muted);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+        
+        .section-divider {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), var(--border-color), rgba(0, 0, 0, 0));
+            margin: 4rem 0;
+        }
+
+        /* --- Audio Showcase Styles --- */
+        .audio-showcase {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow-x: auto; /* For smaller screens */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        thead th {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--highlight-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.2rem;
+        }
+        
+        tbody tr:not(:last-child) td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+        
+        audio {
+            width: 100%;
+            min-width: 250px; /* Ensures controls don't get too squished */
+        }
+        
+        /* --- Matrix Animation Styles --- */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background-color: var(--container-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 0 auto 2rem auto;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .cell {
+            background-color: #3d3d41;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, background-color 0.5s ease, color 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        .cell.updating {
+            animation: flip 0.6s ease-in-out;
+        }
+
+        @keyframes flip {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, var(--primary-color), #805ad5);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.4);
+        }
+
+        .control-btn#reset-btn {
+            background: #4a4a50;
+        }
+        .control-btn#reset-btn:hover {
+            background: #5a5a60;
+            box-shadow: 0 6px 20px rgba(90, 90, 96, 0.4);
+        }
+        
+        .step-description {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--highlight-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-formula {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: #c0c0c0;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="main-container">
+        <header class="header">
+            <a href="https://cappiepappies.github.io" class="header-link">cappiepappies.github.io</a>
+            <h1>Mask-Based Diffusion for Music Generation From Everyday Sounds</h1>
+            <p>An output page showcasing the inputs and outputs of our research paper.</p>
+        </header>
+
+        <section id="examples" class="section">
+            <h2>Noise-to-Music Examples</h2>
+            <div class="audio-showcase">
+                <table>
+                    <thead>
+                        <tr>
+                            <th align="center">📖 Noise Sample</th>
+                            <th align="center">🎧 Noise Input</th>
+                            <th align="center">🎼 Music Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td align="center">A passing train</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/train_passing_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/train_passing_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">A ticking clock</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/clock_ticking_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/clock_ticking_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">A cuckoo clock</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/cuckoo_clock_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/cuckoo_clock_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">Coin sound from Mario</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/mario_coin_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/mario_coin_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">A honking truck</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/loud_honking_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/loud_honking_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">A gaggle of geese</td>
+                            <td align="center">
+                                <audio controls><source src="inputs/geese_honking_input.wav" type="audio/wav"></audio>
+                            </td>
+                            <td align="center">
+                                <audio controls><source src="outputs/geese_honking_output.wav" type="audio/wav"></audio>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <section id="animation" class="section">
+            <h2>Mask Generation Animation</h2>
+            <div class="matrix-grid" id="matrixGrid"></div>
+            <div class="controls">
+                <button class="control-btn" id="start-btn">Start</button>
+                <button class="control-btn" id="reset-btn">Reset</button>
+            </div>
+            <div class="step-description">
+                <div class="step-title" id="stepTitle">Ready</div>
+                <div class="step-formula" id="stepFormula">Click "Start" to see the step-by-step transformation.</div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Data for each transformation step ---
+        const matrixStates = [
+            {
+                title: 'Initial Spectrogram',
+                formula: 'Raw input where low values = high energy.',
+                matrix: [
+                    [200, 180, 180, 200],
+                    [180, 10, 80, 180],
+                    [180, 40, 100, 180],
+                    [200, 180, 200, 200]
+                ]
+            },
+            {
+                title: 'Step 1: Inversion',
+                formula: 'M\' = 255 - M',
+                matrix: [
+                    [55, 75, 75, 55],
+                    [75, 245, 175, 75],
+                    [75, 215, 155, 75],
+                    [55, 75, 55, 55]
+                ]
+            },
+            {
+                title: 'Step 2: Brightness Reduction',
+                formula: 'M\' = M × 0.05',
+                matrix: [
+                    [2.75, 3.75, 3.75, 2.75],
+                    [3.75, 12.25, 8.75, 3.75],
+                    [3.75, 10.75, 7.75, 3.75],
+                    [2.75, 3.75, 2.75, 2.75]
+                ]
+            },
+            {
+                title: 'Step 3: Contrast Enhancement',
+                formula: 'M\' = clip(μ + k(M - μ), 0, 255)',
+                matrix: [
+                    [0.0, 0.0, 0.0, 0.0],
+                    [0.0, 255.0, 255.0, 0.0],
+                    [0.0, 255.0, 255.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0]
+                ]
+            },
+            {
+                title: 'Step 4: Downshift',
+                formula: 'M\' = max(M - 10, 0)',
+                matrix: [
+                    [0.0, 0.0, 0.0, 0.0],
+                    [0.0, 245.0, 245.0, 0.0],
+                    [0.0, 245.0, 245.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0]
+                ]
+            },
+            {
+                title: 'Final Mask',
+                formula: 'The process is complete. Ready for diffusion.',
+                matrix: [
+                    [0.0, 0.0, 0.0, 0.0],
+                    [0.0, 245.0, 245.0, 0.0],
+                    [0.0, 245.0, 245.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0]
+                ]
+            }
+        ];
+
+        // --- DOM Elements ---
+        const grid = document.getElementById('matrixGrid');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const stepTitleEl = document.getElementById('stepTitle');
+        const stepFormulaEl = document.getElementById('stepFormula');
+
+        // --- State Variables ---
+        let currentStep = 0;
+        let isAnimating = false;
+        let isPaused = false;
+        let animationTimeoutId = null;
+        let cells = [];
+
+        // --- Functions ---
+        function getColorForValue(value, step) {
+            const t = Math.min(Math.max(value / 255, 0), 1);
+            let hue, saturation, lightness;
+            if (step === 0) {
+                hue = 270; saturation = 80; lightness = 90 - (t * 60);
+            } else {
+                hue = 40 + (t * 20); saturation = 90; lightness = 30 + (t * 50);
+            }
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        function updateCell(cell, newValue, step) {
+            cell.classList.add('updating');
+            setTimeout(() => {
+                cell.textContent = Number.isInteger(newValue) ? newValue : newValue.toFixed(2);
+                cell.style.backgroundColor = getColorForValue(newValue, step);
+            }, 300);
+            
+            cell.addEventListener('animationend', () => {
+                cell.classList.remove('updating');
+            }, { once: true });
+        }
+
+        function updateGrid(newMatrix, step) {
+            const flatMatrix = newMatrix.flat();
+            flatMatrix.forEach((value, i) => {
+                setTimeout(() => {
+                    updateCell(cells[i], value, step);
+                }, i * 40);
+            });
+        }
+        
+        function updateDescription(title, formula) {
+            stepTitleEl.textContent = title;
+            stepFormulaEl.textContent = formula;
+        }
+
+        function runAnimation() {
+            if (isPaused) return;
+            if (currentStep >= matrixStates.length) {
+                isAnimating = false;
+                startBtn.textContent = 'Done';
+                startBtn.disabled = true;
+                return;
+            }
+
+            isAnimating = true;
+            const state = matrixStates[currentStep];
+            updateDescription(state.title, state.formula);
+            
+            if (currentStep > 0) {
+                 updateGrid(state.matrix, currentStep);
+            }
+
+            currentStep++;
+            animationTimeoutId = setTimeout(runAnimation, 2500);
+        }
+
+        function resetAnimation() {
+            clearTimeout(animationTimeoutId);
+            currentStep = 0;
+            isAnimating = false;
+            isPaused = false;
+            
+            const initialState = matrixStates[0];
+            updateGrid(initialState.matrix, 0);
+            updateDescription('Ready', 'Click "Start" to see the step-by-step transformation.');
+
+            startBtn.textContent = 'Start';
+            startBtn.disabled = false;
+        }
+
+        function handleStartPause() {
+            if (!isAnimating) {
+                currentStep = 0;
+                runAnimation();
+                startBtn.textContent = 'Pause';
+            } else if (isPaused) {
+                isPaused = false;
+                runAnimation();
+                startBtn.textContent = 'Pause';
+            } else {
+                isPaused = true;
+                clearTimeout(animationTimeoutId);
+                startBtn.textContent = 'Resume';
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                grid.appendChild(cell);
+                cells.push(cell);
+            }
+            
+            resetAnimation();
+
+            startBtn.addEventListener('click', handleStartPause);
+            resetBtn.addEventListener('click', resetAnimation);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
